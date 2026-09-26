@@ -73,21 +73,20 @@ public class ExpenseService {
     @Transactional
     public ExpenseResponse updateExpense(Long id, UpdateExpenseRequest expense) {
         Long userId = getUserId();
-        Expense existingExpense = expenseRepository.findByIdAndUserId(id, userId)
+        Expense existingExpense = expenseRepository.findByIdAndUserIdForUpdate(id, userId)
         .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
         existingExpense.setAmount(expense.getAmount());
         existingExpense.setTitle(expense.getTitle());
         existingExpense.setCategory(expense.getCategory());
         existingExpense.setExpenseDate(expense.getExpenseDate());
-        Expense savedExpense = expenseRepository.save(existingExpense);
-        return toResponse(savedExpense);
+        return toResponse(existingExpense);
     }
 
     // DELETE EXPENSE
     @Transactional
     public void deleteExpense(Long id) {
         Long userId = getUserId();
-        Expense expense = expenseRepository.findByIdAndUserId(id, userId)
+        Expense expense = expenseRepository.findByIdAndUserIdForUpdate(id, userId)
         .orElseThrow(()-> new ResourceNotFoundException("Expense not found"));
         expenseRepository.delete(expense);
     }

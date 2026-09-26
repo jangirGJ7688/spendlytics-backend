@@ -1,0 +1,15 @@
+# Maven build files
+target/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# IDE files
+.idea/
+*.iml
+.DS_Store
+
+# Logs
+*.log
