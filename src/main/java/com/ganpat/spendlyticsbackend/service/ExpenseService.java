@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.ganpat.spendlyticsbackend.dto.ExpensePageResponse;
 import com.ganpat.spendlyticsbackend.dto.CategoryExpenseResponse;
 import com.ganpat.spendlyticsbackend.dto.CreateExpenseRequest;
 import com.ganpat.spendlyticsbackend.dto.ExpenseResponse;
@@ -55,9 +56,19 @@ public class ExpenseService {
 
     // GET ALL EXPENSES
     @Transactional(readOnly = true)
-    public Page<ExpenseResponse> getAllExpenses(Pageable pageable) {
+    public ExpensePageResponse getAllExpenses(Pageable pageable) {
         Long userId = getUserId();
-        return expenseRepository.findByUserId(userId, pageable).map(this:: toResponse);
+        Page<ExpenseResponse> page = expenseRepository.findByUserId(userId, pageable)
+        .map(this::toResponse);
+        return new ExpensePageResponse(
+            page.getContent(),
+            page.getNumber(),
+            page.getSize(),
+            page.getTotalElements(),
+            page.getTotalPages(),
+            page.isFirst(),
+            page.isLast()
+    );
     }
 
     // GET EXPENSE BY ID
@@ -94,7 +105,7 @@ public class ExpenseService {
 
     // SEARCH EXPENSE
     @Transactional(readOnly = true)
-    public Page<ExpenseResponse> searchExpenses(
+    public ExpensePageResponse searchExpenses(
         Category category,
         Double minAmount,
         Double maxAmount,
@@ -110,9 +121,17 @@ public class ExpenseService {
                 dateGreaterThenAndEqualTo(startDate),
                 dateLessThenAndEqualTo(endDate)
             );
-
-            return expenseRepository.findAll(specification, pageable)
+            Page<ExpenseResponse> page = expenseRepository.findAll(specification, pageable)
             .map(this:: toResponse);
+            return new ExpensePageResponse(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isFirst(),
+                page.isLast()
+            );
         }
 
         //EXPENSE SUMMERY
@@ -163,7 +182,6 @@ public class ExpenseService {
     // EXPENSE -> DTO
     private ExpenseResponse toResponse(
             Expense expense) {
-
         return new ExpenseResponse(
                 expense.getId(),
                 expense.getTitle(),

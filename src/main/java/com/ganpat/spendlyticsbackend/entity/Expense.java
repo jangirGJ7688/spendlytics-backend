@@ -10,13 +10,22 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
 @Entity
-@Table(name = "expenses")
+@Table(
+    name = "expenses",
+    indexes = {
+        @Index(
+            name = "idx_expense_user_date",
+            columnList = "user_id, expense_date"
+        )
+    }
+)
 public class Expense {
     
     @Id

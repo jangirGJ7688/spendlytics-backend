@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ganpat.spendlyticsbackend.dto.CreateExpenseRequest;
+import com.ganpat.spendlyticsbackend.dto.ExpensePageResponse;
 import com.ganpat.spendlyticsbackend.dto.ExpenseResponse;
 import com.ganpat.spendlyticsbackend.dto.ExpenseSummeryResponse;
 import com.ganpat.spendlyticsbackend.dto.UpdateExpenseRequest;
@@ -56,14 +57,14 @@ public class ExpenseController {
 
     //GET ALL EXPENSE
     @GetMapping
-    public ResponseEntity<Page<ExpenseResponse>> getAllExpenses(
+    public ResponseEntity<ExpensePageResponse> getAllExpenses(
         @PageableDefault(
             size = 10,
             sort = "expenseDate",
             direction = Sort.Direction.DESC
         )
         Pageable pageable) {
-        Page<ExpenseResponse> expenses = expenseService.getAllExpenses(pageable);
+        ExpensePageResponse expenses = expenseService.getAllExpenses(pageable);
         return ResponseEntity.ok(expenses);
     }
     
@@ -92,7 +93,7 @@ public class ExpenseController {
     // SEARCH EXPENSE
     
     @GetMapping("/search")
-    public ResponseEntity<Page<ExpenseResponse>> searchExpenses(
+    public ResponseEntity<ExpensePageResponse> searchExpenses(
         @RequestParam(required = false)
         Category category,
         
@@ -113,7 +114,7 @@ public class ExpenseController {
         )
 
         Pageable pageable) {
-            Page<ExpenseResponse> expenses = expenseService.searchExpenses(
+            ExpensePageResponse expenses = expenseService.searchExpenses(
             category,
             minAmount,
             maxAmount,

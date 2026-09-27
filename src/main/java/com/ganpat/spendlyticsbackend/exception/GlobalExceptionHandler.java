@@ -1,9 +1,6 @@
 package com.ganpat.spendlyticsbackend.exception;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -15,7 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.ganpat.spendlyticsbackend.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
-@RestControllerAdvice 
+@RestControllerAdvice
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -51,7 +48,7 @@ public class GlobalExceptionHandler {
             HttpStatus.NOT_FOUND.value(),
             "Not found",
             exception.getMessage(),
-            request.getRequestId()
+            request.getRequestURI()
         );
             return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
@@ -59,11 +56,16 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException exception) {
-        Map<String, Object> response = new HashMap<>();
-            response.put("status", 400);
-            response.put("message", exception.getMessage());
-
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+        IllegalArgumentException exception,
+        HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.BAD_REQUEST.value(),
+            "Bad request",
+            exception.getMessage(),
+            request.getRequestURI()
+        );
             return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(response);

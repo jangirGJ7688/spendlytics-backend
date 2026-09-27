@@ -9,15 +9,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.ganpat.spendlyticsbackend.exception.CustomAccessDeniedHandler;
+import com.ganpat.spendlyticsbackend.exception.CustomAuthenticationEntryPoint;
 import com.ganpat.spendlyticsbackend.security.JwtAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
 
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    public SecurityConfig(
+        JwtAuthenticationFilter jwtAuthenticationFilter,
+        CustomAuthenticationEntryPoint authenticationEntryPoint,
+        CustomAccessDeniedHandler accessDeniedHandler) {
+            this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+            this.authenticationEntryPoint = authenticationEntryPoint;
+            this.accessDeniedHandler = accessDeniedHandler;
     }
     
     @Bean
@@ -35,6 +44,11 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(
                     SessionCreationPolicy.STATELESS
                 )
+            )
+            .exceptionHandling(exception ->
+                exception
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler)
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
