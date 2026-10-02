@@ -3,6 +3,7 @@ package com.ganpat.spendlyticsbackend.service;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,12 +32,18 @@ import static com.ganpat.spendlyticsbackend.repository.ExpenseSpecification.*;
 public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
+    private final ExpenseSummaryCacheService expenseSummaryCacheService;
+    private final ExpenseCacheService expenseCacheService;
 
     public ExpenseService(
         ExpenseRepository expenseRepository,
-        UserRepository userRepository) {
+        UserRepository userRepository,
+        ExpenseSummaryCacheService expenseSummaryCacheService,
+        ExpenseCacheService expenseCacheService) {
         this.expenseRepository = expenseRepository;
         this.userRepository = userRepository;
+        this.expenseSummaryCacheService = expenseSummaryCacheService;
+        this.expenseCacheService = expenseCacheService;
     }
 
     // CREATE EXPENSE
@@ -51,6 +58,7 @@ public class ExpenseService {
         expense.setExpenseDate(request.getExpenseDate());
         expense.setUser(user);
         Expense savedExpense = expenseRepository.save(expense);
+        expenseCacheService.evictUserSummery(user.getId());
         return toResponse(savedExpense);
     }
 
@@ -90,6 +98,7 @@ public class ExpenseService {
         existingExpense.setTitle(expense.getTitle());
         existingExpense.setCategory(expense.getCategory());
         existingExpense.setExpenseDate(expense.getExpenseDate());
+        expenseCacheService.evictUserSummery(userId);
         return toResponse(existingExpense);
     }
 
@@ -100,6 +109,7 @@ public class ExpenseService {
         Expense expense = expenseRepository.findByIdAndUserIdForUpdate(id, userId)
         .orElseThrow(()-> new ResourceNotFoundException("Expense not found"));
         expenseRepository.delete(expense);
+        expenseCacheService.evictUserSummery(userId);
     }
 
 
@@ -134,34 +144,22 @@ public class ExpenseService {
             );
         }
 
-        //EXPENSE SUMMERY
+        // EXPENSE SUMMARY
         @Transactional(readOnly = true)
         public ExpenseSummeryResponse getExpenseSummery(
             LocalDate startDate,
             LocalDate endDate) {
+            System.out.println("Fetching expense summary from database");
             if(startDate != null && endDate != null && startDate.isAfter(endDate)) {
                 throw new IllegalArgumentException("Start date cannot be after end date");
             }
             Long userId = getUserId();
-            Specification<Expense> specification = Specification.allOf(
-                hasUser(userId),
-                dateGreaterThenAndEqualTo(startDate),
-                dateLessThenAndEqualTo(endDate)
+
+            return expenseSummaryCacheService.getSummary(
+                    userId,
+                    startDate,
+                    endDate
             );
-            List<Expense> expenses = expenseRepository.findAll(specification);
-            Double totalAmount = expenses.stream().mapToDouble(Expense::getAmount).sum();
-            List<CategoryExpenseResponse> categoryWiseSummary = expenses.stream().collect(
-                java.util.stream.Collectors.groupingBy(
-                    Expense::getCategory,
-                    java.util.stream.Collectors.summingDouble(
-                        Expense::getAmount
-                    )
-                )
-            ).entrySet()
-            .stream()
-            .map(entry -> new CategoryExpenseResponse(entry.getKey(), entry.getValue()))
-            .toList();
-            return new ExpenseSummeryResponse(totalAmount, categoryWiseSummary);
         }
 
 

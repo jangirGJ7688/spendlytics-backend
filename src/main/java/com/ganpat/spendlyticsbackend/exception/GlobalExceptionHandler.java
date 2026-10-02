@@ -70,4 +70,20 @@ public class GlobalExceptionHandler {
             .status(HttpStatus.BAD_REQUEST)
             .body(response);
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(
+        Exception exception,
+        HttpServletRequest request) {
+        ErrorResponse response = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            "Internal server error",
+            "Something went wrong. Please try again later.",
+            request.getRequestURI()
+        );
+            return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(response);
+    }
 }

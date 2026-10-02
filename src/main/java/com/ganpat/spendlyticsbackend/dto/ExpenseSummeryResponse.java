@@ -6,6 +6,9 @@ public class ExpenseSummeryResponse {
 
     private Double totalAmount;
     private List<CategoryExpenseResponse> categoryWiseExpense;
+    
+    public ExpenseSummeryResponse() {
+    }
 
     public ExpenseSummeryResponse(
         Double totalAmount,
@@ -19,7 +22,15 @@ public class ExpenseSummeryResponse {
         return categoryWiseExpense;
     }
 
+    public void setCategoryWiseExpense(List<CategoryExpenseResponse> categoryWiseExpense) {
+        this.categoryWiseExpense = categoryWiseExpense;
+    }
+
     public Double getTotalAmount() {
         return totalAmount;
+    }
+
+    public void setTotalAmount(Double totalAmount) {
+        this.totalAmount = totalAmount;
     }
 }
