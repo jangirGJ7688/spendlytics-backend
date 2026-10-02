@@ -11,6 +11,7 @@ import com.ganpat.spendlyticsbackend.dto.UpdateExpenseRequest;
 import com.ganpat.spendlyticsbackend.enums.Category;
 import com.ganpat.spendlyticsbackend.service.ExpenseService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,13 +31,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.data.domain.Sort;
 
 
-
-
-
-
-
-@RestController 
+@RestController
 @RequestMapping("/expenses")
+@SecurityRequirement(name = "bearerAuth")
 public class ExpenseController {
     private final ExpenseService expenseService;
 

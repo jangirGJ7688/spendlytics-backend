@@ -1,9 +1,7 @@
 package com.ganpat.spendlyticsbackend.service;
 
 import java.time.LocalDate;
-import java.util.List;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -12,7 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.ganpat.spendlyticsbackend.dto.ExpensePageResponse;
-import com.ganpat.spendlyticsbackend.dto.CategoryExpenseResponse;
 import com.ganpat.spendlyticsbackend.dto.CreateExpenseRequest;
 import com.ganpat.spendlyticsbackend.dto.ExpenseResponse;
 import com.ganpat.spendlyticsbackend.dto.ExpenseSummeryResponse;
