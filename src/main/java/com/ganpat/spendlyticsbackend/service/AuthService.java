@@ -9,6 +9,8 @@ import com.ganpat.spendlyticsbackend.dto.LoginResponse;
 import com.ganpat.spendlyticsbackend.dto.UserResponse;
 import com.ganpat.spendlyticsbackend.entity.RefreshToken;
 import com.ganpat.spendlyticsbackend.entity.User;
+import com.ganpat.spendlyticsbackend.exception.ResourceNotFoundException;
+import com.ganpat.spendlyticsbackend.repository.ExpenseRepository;
 import com.ganpat.spendlyticsbackend.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -24,11 +26,23 @@ public class AuthService {
 
     private final RefreshTokenService refreshTokenService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, RefreshTokenService refreshTokenService) {
+    private final ExpenseRepository expenseRepository;
+
+    private final ExpenseCacheService expenseCacheService;
+
+    public AuthService(
+        UserRepository userRepository,
+        PasswordEncoder passwordEncoder,
+        JwtService jwtService,
+        RefreshTokenService refreshTokenService,
+        ExpenseRepository expenseRepository,
+        ExpenseCacheService expenseCacheService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
+        this.expenseRepository = expenseRepository;
+        this.expenseCacheService = expenseCacheService;
     }
 
     @Transactional
@@ -79,6 +93,22 @@ public class AuthService {
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         return new LoginResponse(token, refreshToken.getToken());
+    }
+
+    @Transactional
+    public void deleteAccount(Long userId) {
+        User user = userRepository.findById(userId)
+        .orElseThrow(() ->
+            new ResourceNotFoundException("User not found")
+        );
+
+        refreshTokenService.revokeAllUserTokens(userId);
+
+        expenseRepository.deleteAllByUserId(userId);
+
+        expenseCacheService.evictUserSummery(userId);
+
+        userRepository.delete(user);
     }
 
 }

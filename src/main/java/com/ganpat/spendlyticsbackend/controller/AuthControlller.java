@@ -18,6 +18,8 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -74,6 +76,13 @@ public class AuthControlller {
         
         refreshTokenService.revokeToken(request.refreshToken());
         
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/account")
+    public ResponseEntity<Void> deleteAccount(Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        authService.deleteAccount(userId);
         return ResponseEntity.noContent().build();
     }
     

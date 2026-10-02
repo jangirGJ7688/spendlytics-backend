@@ -28,4 +28,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
         AND e.user.id = :userId
     """)
     Optional<Expense> findByIdAndUserIdForUpdate( Long id, Long userId);
+
+    void deleteAllByUserId(Long userId);
 }

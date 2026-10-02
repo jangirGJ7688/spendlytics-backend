@@ -1,6 +1,8 @@
 package com.ganpat.spendlyticsbackend.service;
 
 import java.util.Set;
+
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ public class ExpenseCacheService {
 
     public void evictUserSummery(Long userId) {
 
+        try {
+
         String pattern = "expenseSummery::" + userId + ":*";
 
         Set<String> keys = redisTemplate.keys(pattern);
@@ -30,6 +34,12 @@ public class ExpenseCacheService {
             System.out.println(
                 "No summary cache found for user: " + userId
             );
+        }
+        } catch (RedisConnectionFailureException exception) {
+            System.out.println(
+            "Redis unavailable. Skipping cache eviction for user: "
+            + userId
+        );
         }
     }
 }
