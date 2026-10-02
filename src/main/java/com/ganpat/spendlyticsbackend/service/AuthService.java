@@ -7,6 +7,7 @@ import com.ganpat.spendlyticsbackend.dto.CreateUserRequest;
 import com.ganpat.spendlyticsbackend.dto.LoginRequest;
 import com.ganpat.spendlyticsbackend.dto.LoginResponse;
 import com.ganpat.spendlyticsbackend.dto.UserResponse;
+import com.ganpat.spendlyticsbackend.entity.RefreshToken;
 import com.ganpat.spendlyticsbackend.entity.User;
 import com.ganpat.spendlyticsbackend.repository.UserRepository;
 
@@ -21,10 +22,13 @@ public class AuthService {
 
     private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    private final RefreshTokenService refreshTokenService;
+
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Transactional
@@ -71,8 +75,10 @@ public class AuthService {
         }
 
         String token = jwtService.generateToken(user.getId(), user.getEmail());
+        
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
-        return new LoginResponse(token);
+        return new LoginResponse(token, refreshToken.getToken());
     }
 
 }
